@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Web人狼 - ゲーム</title>
+</head>
+<body>
+
+<h2>ゲーム画面</h2>
+<p id="roomInfo"></p>
+
+<script type="module">
+  import { ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const db = window.db;
+
+  const roomId = localStorage.getItem("roomId");
+
+  document.getElementById("roomInfo").innerText = "Room ID: " + roomId;
+
+  onValue(ref(db, "rooms/" + roomId + "/players"), (snapshot) => {
+    console.log(snapshot.val());
+  });
+</script>
+
+</body>
+</html>
