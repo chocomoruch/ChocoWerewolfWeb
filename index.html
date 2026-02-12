@@ -5,15 +5,27 @@
 </head>
 <body>
 
-<h1>Web人狼</h1>
+<h1>Web人狼1</h1>
 
 <input id="name" placeholder="名前">
 <button id="createRoom">部屋を作る</button>
 
 <script type="module">
-  import { ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyAgEYd21IOxMXnKZO9g-yLOj9-rmzxJs_0",
+    authDomain: "chocowerewolfweb.firebaseapp.com",
+    projectId: "chocowerewolfweb",
+    storageBucket: "chocowerewolfweb.firebasestorage.app",
+    messagingSenderId: "1079778595213",
+    appId: "1:1079778595213:web:f13c5f3487ec2e19a36dc4",
+    measurementId: "G-ZXKD0T7766"
+  };
 
-  const db = window.db;
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
   function generateRoomId() {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
