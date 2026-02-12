@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Web人狼 - 部屋作成</title>
+</head>
+<body>
+
+<h1>Web人狼</h1>
+
+<input id="name" placeholder="名前">
+<button id="createRoom">部屋を作る</button>
+
+<script type="module">
+  import { ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const db = window.db;
+
+  function generateRoomId() {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
+  }
+
+  document.getElementById("createRoom").onclick = async () => {
+    const name = document.getElementById("name").value;
+    if (!name) return alert("名前入れて！");
+
+    const roomId = generateRoomId();
+    const playerId = crypto.randomUUID();
+
+    await set(ref(db, "rooms/" + roomId), {
+      hostId: playerId,
+      status: "waiting",
+      rolesConfig: {
+        villager: 4,
+        werewolf: 2,
+        seer: 1
+      },
+      players: {
+        [playerId]: {
+          name: name,
+          role: null,
+          xp: 0,
+          level: 1,
+          isHost: true
+        }
+      }
+    });
+
+    localStorage.setItem("roomId", roomId);
+    localStorage.setItem("playerId", playerId);
+
+    location.href = "game.html";
+  };
+</script>
+
+</body>
+</html>
