@@ -10,59 +10,117 @@
 <input id="name" placeholder="名前">
 <button id="createRoom">部屋を作る</button>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyAgEYd21IOxMXnKZO9g-yLOj9-rmzxJs_0",
-    authDomain: "chocowerewolfweb.firebaseapp.com",
-    projectId: "chocowerewolfweb",
-    storageBucket: "chocowerewolfweb.firebasestorage.app",
-    messagingSenderId: "1079778595213",
-    appId: "1:1079778595213:web:f13c5f3487ec2e19a36dc4",
-    measurementId: "G-ZXKD0T7766",
-    databaseURL: "https://chocowerewolfweb-default-rtdb.asia-southeast1.firebasedatabase.app"
-  };
+<hr>
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+<h2>部屋に参加</h2>
 
-  function generateRoomId() {
-    return Math.random().toString(36).substring(2, 8).toUpperCase();
+<input id="joinName" placeholder="名前">
+<input id="joinRoomId" placeholder="ルームID">
+<button id="joinRoom">参加する</button>
+
+<script type="module">import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getDatabase,
+  ref,
+  set,
+  update,
+  get
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+/* =========================
+   Firebase 初期化
+========================= */
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAgEYd21IOxMXnKZO9g-yLOj9-rmzxJs_0",
+  authDomain: "chocowerewolfweb.firebaseapp.com",
+  projectId: "chocowerewolfweb",
+  storageBucket: "chocowerewolfweb.firebasestorage.app",
+  messagingSenderId: "1079778595213",
+  appId: "1:1079778595213:web:f13c5f3487ec2e19a36dc4",
+  measurementId: "G-ZXKD0T7766"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+/* =========================
+   共通関数
+========================= */
+
+function generateRoomId() {
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
+/* =========================
+   部屋作成
+========================= */
+
+document.getElementById("createRoom").onclick = async () => {
+  const name = document.getElementById("name").value.trim();
+  if (!name) return alert("名前入れて！");
+
+  const roomId = generateRoomId();
+  const playerId = crypto.randomUUID();
+
+  await set(ref(db, "rooms/" + roomId), {
+    hostId: playerId,
+    status: "waiting",
+    rolesConfig: {
+      villager: 4,
+      werewolf: 2,
+      seer: 1
+    },
+    players: {
+      [playerId]: {
+        name: name,
+        role: null,
+        xp: 0,
+        level: 1,
+        isHost: true
+      }
+    }
+  });
+
+  localStorage.setItem("roomId", roomId);
+  localStorage.setItem("playerId", playerId);
+
+  location.href = "game.html";
+};
+
+/* =========================
+   部屋参加
+========================= */
+
+document.getElementById("joinRoom").onclick = async () => {
+  const name = document.getElementById("joinName").value.trim();
+  const roomId = document.getElementById("joinRoomId").value.trim().toUpperCase();
+
+  if (!name || !roomId) return alert("名前とルームID入れて！");
+
+  const playerId = crypto.randomUUID();
+
+  const roomRef = ref(db, "rooms/" + roomId);
+  const snapshot = await get(roomRef);
+
+  if (!snapshot.exists()) {
+    return alert("その部屋存在しない！");
   }
 
-  document.getElementById("createRoom").onclick = async () => {
-    const name = document.getElementById("name").value;
-    if (!name) return alert("名前入れて！");
+  await update(ref(db, "rooms/" + roomId + "/players/" + playerId), {
+    name: name,
+    role: null,
+    xp: 0,
+    level: 1,
+    isHost: false
+  });
 
-    const roomId = generateRoomId();
-    const playerId = crypto.randomUUID();
+  localStorage.setItem("roomId", roomId);
+  localStorage.setItem("playerId", playerId);
 
-    await set(ref(db, "rooms/" + roomId), {
-      hostId: playerId,
-      status: "waiting",
-      rolesConfig: {
-        villager: 4,
-        werewolf: 2,
-        seer: 1
-      },
-      players: {
-        [playerId]: {
-          name: name,
-          role: null,
-          xp: 0,
-          level: 1,
-          isHost: true
-        }
-      }
-    });
+  location.href = "game.html";
+};
 
-    localStorage.setItem("roomId", roomId);
-    localStorage.setItem("playerId", playerId);
-
-    location.href = "game.html";
-  };
 </script>
 
 </body>
